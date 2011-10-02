@@ -1,0 +1,30 @@
+% stash title => 'Root of Compassion';
+
+<div>
+Welcome <%= $user->{name} %> |   <a href="/logout">Logout</a>
+</div>
+
+<h1>Compassion Flowers</h1>
+
+<P>You trust that the following people can demonstrate unconditional giving to you
+  and train others to do the same</P>
+
+<ul>
+
+  <% for my $s (@$sponsored) { %>
+
+  <li>
+    <a href="/view/<%= $s->{id} %>">
+    <%= $s->{name} %>
+    </a>
+  </li>
+ 
+  <% } %>
+
+</ul>
+
+
+
+<P>
+
+</P>

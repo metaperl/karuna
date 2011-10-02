@@ -1,0 +1,36 @@
+package Local::DBIx::DBH;
+
+use strict;
+use warnings;
+
+use base qw(DBIx::DBH);
+
+
+
+
+sub pgshared {
+
+    $main::sharedssl      = 'disable';
+    my $port = $main::sharedport || 5432;
+
+    my $host = $main::sharedhost || 'localhost';
+    my $username = $main::sharedusername || 'postgres';
+    my $password = $main::sharedpassword || 'postgres';
+
+    my $config = DBIx::DBH->new(
+
+        username => $username,
+        password => $password,
+
+        dsn => {
+            driver  => 'Pg',
+            dbname  => 'biotrackthc',
+            port    => $port,
+            sslmode => $main::sharedssl,
+            host    => $host,
+        },
+        attr => { RaiseError => 1 }
+    );
+}
+
+1;
