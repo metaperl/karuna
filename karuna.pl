@@ -50,7 +50,12 @@ plugin 'Authentication' => {
         my $C = $self->customer($email);
         return undef unless scalar keys %$C;
 
-        $password eq $C->{password} ? $email : undef;
+        if ($password eq $C->{password}) {
+	  $self->session->{user} = $C;
+	  $email;
+	} else {
+	  undef;
+	}
     },
 };
 
@@ -107,7 +112,10 @@ post '/register_eval' => sub {
 under sub {
     my ($self) = @_;
     return 1
-      if $self->authenticate( $self->param('email'), $self->param('password') );
+      if (
+	  $self->authenticate( $self->param('email'), $self->param('password') )
+	  or $self->session->{user});
+    app->log->debug('Authentication FAILED');
     $self->redirect_to('/');
 };
 
@@ -119,7 +127,7 @@ any '/root' => sub {
 
     warn $self->dumper( $E, $U );
 
-        my $sponsored = $self->da->sqlarrayhash("
+    my $sponsored = $self->da->sqlarrayhash( "
     SELECT
       *
     FROM
@@ -127,13 +135,44 @@ any '/root' => sub {
     WHERE
       sponsor_id=$U->{id}
     "
-        );
+    );
 
-    $self->session->{user} = $U;
 
-    $self->stash( user => $U );
+
+    $self->stash( user      => $U );
     $self->stash( sponsored => $sponsored );
     $self->render( template => 'root' );
+
+};
+
+any '/view/:id' => sub {
+    my ($self) = @_;
+
+    my $id = $self->param('id');
+
+    my $viewed = $self->da->sqlrowhash( "
+    SELECT
+      *
+    FROM
+      users
+    WHERE
+      id=$id
+    "
+    );
+
+    my $sponsored = $self->da->sqlarrayhash( "
+    SELECT
+      *
+    FROM
+      users
+    WHERE
+      sponsor_id=$id
+    "
+    );
+
+    $self->stash( user      => $viewed );
+    $self->stash( sponsored => $sponsored );
+    $self->render( template => 'view' );
 
 };
 
