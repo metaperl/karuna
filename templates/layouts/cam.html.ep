@@ -2,12 +2,14 @@
 <html>
   <head>
     <title><%= title %></title>
-    <link media="all" type="text/css" href="/css/le-frog/jquery-ui-1.8.16.custom.css" rel="stylesheet">
+    <link media="all" type="text/css" href="/css/menu.css" rel="stylesheet">
     %= include 'libs' 
   </head>
   <body>
 
     %= include 'nav'
+
+<hr>
 
     <div id="content">
       <%= content %>

@@ -34,6 +34,22 @@ helper customer => sub {
         \$email );
 };
 
+helper 'get_user_by_id' => sub {
+  my($self, $id) = @_;
+
+    my $viewed = $self->da->sqlrowhash( "
+    SELECT
+      *
+    FROM
+      users
+    WHERE
+      id=$id
+    "
+    );
+
+};
+
+
 helper dumper => sub {
     my ( $self, @struct ) = @_;
     Dumper( \@struct );
@@ -71,6 +87,14 @@ get '/' => sub {
     app->log->debug("CWD:$c.");
 
     $self->render( template => 'index' );
+
+};
+
+get '/doc' => sub {
+    my $self = shift;
+
+
+    $self->render( template => 'docs' );
 
 };
 
@@ -149,11 +173,15 @@ any '/root' => sub {
     "
     );
 
+    my $sponsor = $self->get_user_by_id($U->{sponsor_id});
+
     $self->stash( user      => $U );
+    $self->stash( sponsor => $sponsor );
     $self->stash( sponsored => $sponsored );
     $self->render( template => 'root' );
 
 };
+
 
 any '/view/:id' => sub {
     my ($self) = @_;

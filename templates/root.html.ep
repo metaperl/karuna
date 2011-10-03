@@ -5,6 +5,15 @@
 Welcome <%= $user->{name} %>
 </div>
 
+<h1>Compassion Sponsor</h1>
+
+<P>You were brought into the Karuna Tree by 
+  <a href="/view/<%= $sponsor->{id} %>" >
+    <%= $sponsor->{name} %>
+  </a>
+</P>
+
+
 <h1>Compassion Flowers</h1>
 
 <P>You trust that the following people can demonstrate unconditional giving to you

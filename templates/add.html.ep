@@ -1,4 +1,5 @@
-% stash title => 'Sponsor New Compassion Flower;
+% layout 'cam';
+% stash title => 'Sponsor New Compassion Flower';
 
 <h1>Sponsor New Compassion Flower</h1>
 
