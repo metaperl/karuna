@@ -17,7 +17,7 @@ use DBI;
 DBI->trace(1);
 use SQL::Interp qw/:all/;
 
-app->defaults( layout => 'cam' );
+#app->defaults( layout => 'cam' );
 
 helper da => sub {
     use Local::DB;
@@ -50,12 +50,13 @@ plugin 'Authentication' => {
         my $C = $self->customer($email);
         return undef unless scalar keys %$C;
 
-        if ($password eq $C->{password}) {
-	  $self->session->{user} = $C;
-	  $email;
-	} else {
-	  undef;
-	}
+        if ( $password eq $C->{password} ) {
+            $self->session->{user} = $C;
+            $email;
+        }
+        else {
+            undef;
+        }
     },
 };
 
@@ -74,7 +75,32 @@ get '/' => sub {
 };
 
 get '/register' => sub {
-    shift->render( template => 'register' );
+    shift->render( template => 'registercode' );
+};
+
+post '/registerflower' => sub {
+    my ($self) = @_;
+
+    my $email = $self->param('email');
+
+    my $row = $self->da->sqlrowhash( "
+    SELECT
+      *
+    FROM
+      users
+    WHERE
+      email='$email'
+    "
+    );
+
+    app->log->debug( $self->dumper( ROW => $row ) );
+
+    if ( scalar keys %$row ) {
+        $self->render( template => 'register', %$row );
+    }
+    else {
+        $self->redirect_to('/');
+    }
 };
 
 get '/logout' => sub {
@@ -86,24 +112,12 @@ get '/logout' => sub {
 post '/register_eval' => sub {
     my $self = shift;
 
-    my $E = $self->param('email');
-    my $C = $self->customer($E);
+    my @param = $self->param;
+    my %param = map { $_ => $self->param($_) } @param;
 
-    scalar keys %$C
-      or return $self->render(
-        text => sprintf "Email '%s' does not belong to a customer",
-        $E
-      );
+    delete $param{password_again};
 
-    use Digest::SHA qw/sha512_base64/;
-    my $P = sha512_base64( $self->param('password') );
-
-    my $rows = $self->da->do(
-        sql_interp(
-            "UPDATE customers SET password=",
-            \$P, "WHERE email = ", \$E
-        )
-    );
+    my $rows = $self->da->do( sql_interp( "INSERT INTO users", \%param ) );
 
     $self->redirect_to('/');
 
@@ -113,8 +127,8 @@ under sub {
     my ($self) = @_;
     return 1
       if (
-	  $self->authenticate( $self->param('email'), $self->param('password') )
-	  or $self->session->{user});
+        $self->authenticate( $self->param('email'), $self->param('password') )
+        or $self->session->{user} );
     app->log->debug('Authentication FAILED');
     $self->redirect_to('/');
 };
@@ -122,10 +136,8 @@ under sub {
 any '/root' => sub {
     my $self = shift;
 
-    my $E = $self->param('email');
-    my $U = $self->customer($E);
-
-    warn $self->dumper( $E, $U );
+    my $U = $self->session->{user};
+    warn $self->dumper($U);
 
     my $sponsored = $self->da->sqlarrayhash( "
     SELECT
@@ -136,8 +148,6 @@ any '/root' => sub {
       sponsor_id=$U->{id}
     "
     );
-
-
 
     $self->stash( user      => $U );
     $self->stash( sponsored => $sponsored );
@@ -173,6 +183,37 @@ any '/view/:id' => sub {
     $self->stash( user      => $viewed );
     $self->stash( sponsored => $sponsored );
     $self->render( template => 'view' );
+
+};
+
+any '/add' => sub {
+    my ($self) = @_;
+
+    my $U = $self->session->{user};
+
+    # my $viewed = $self->da->sqlrowhash( "
+    # SELECT
+    #   *
+    # FROM
+    #   users
+    # WHERE
+    #   id=$id
+    # "
+    # );
+
+    # my $sponsored = $self->da->sqlarrayhash( "
+    # SELECT
+    #   *
+    # FROM
+    #   users
+    # WHERE
+    #   sponsor_id=$id
+    # "
+    # );
+
+    # $self->stash( user      => $viewed );
+    # $self->stash( sponsored => $sponsored );
+    $self->render( template => 'add' );
 
 };
 

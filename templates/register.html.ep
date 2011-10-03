@@ -2,7 +2,14 @@
 
 <form id="form" method="post" action="register_eval">
   <fieldset>
-    <legend>Please register</legend>
+    <legend>Please register (Sponsor <%= $name %>)</legend>
+
+    <p>
+      <label for="name">Name</label>&nbsp;
+      <input id="name" name="name" size="75"  class="required name"
+	     minlength="2" placeholder="Please enter the email address on file with the dispensary" /> 
+    </p>
+
 
     <p>
       <label for="email">Email Address</label>&nbsp;
@@ -22,6 +29,11 @@
       <input id="password_again" name="password_again" size="75"  type="password" class="required" minlength="4"
 	     placeholder="Please enter password again for verification"
 	     />
+    </p>
+
+    <p>
+      <label for="sponsor_id">ID of sponsor</label>&nbsp;
+      <input type="text" name="sponsor_id" value="<%= $id %>" readonly="readonly" />
     </p>
 
     <p>

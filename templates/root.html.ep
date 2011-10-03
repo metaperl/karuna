@@ -1,7 +1,8 @@
+% layout 'cam';
 % stash title => 'Root of Compassion';
 
 <div>
-Welcome <%= $user->{name} %> |   <a href="/logout">Logout</a>
+Welcome <%= $user->{name} %>
 </div>
 
 <h1>Compassion Flowers</h1>
